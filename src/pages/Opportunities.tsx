@@ -1,9 +1,9 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import OpportunityCard from '@/components/OpportunityCard';
+import AddOpportunityModal from '@/components/AddOpportunityModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
@@ -13,14 +13,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, Filter } from 'lucide-react';
+import { Search, Filter, Plus } from 'lucide-react';
 
 const Opportunities = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [locationFilter, setLocationFilter] = useState('all');
-
-  const allOpportunities = [
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [opportunities, setOpportunities] = useState([
     {
       id: '1',
       title: "Software Engineering Intern",
@@ -93,9 +93,18 @@ const Opportunities = () => {
       tags: ["Medical", "Research", "Lab Work", "Healthcare"],
       deadline: "Jan 20, 2025"
     }
-  ];
+  ]);
 
-  const filteredOpportunities = allOpportunities.filter(opportunity => {
+  const addOpportunity = (newOpportunity: any) => {
+    const opportunityWithId = {
+      ...newOpportunity,
+      id: (opportunities.length + 1).toString(),
+      applicants: 0
+    };
+    setOpportunities([opportunityWithId, ...opportunities]);
+  };
+
+  const filteredOpportunities = opportunities.filter(opportunity => {
     const matchesSearch = opportunity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          opportunity.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          opportunity.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -112,11 +121,25 @@ const Opportunities = () => {
       
       {/* Hero Section */}
       <section className="pt-24 pb-12 px-4">
-        <div className="max-w-7xl mx-auto text-center">
-          <h1 className="gradient-text mb-4">Discover Amazing Opportunities</h1>
-          <p className="text-xl text-foreground/70 max-w-3xl mx-auto">
-            Find internships, research programs, competitions, and scholarships tailored to your interests and career goals.
-          </p>
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="gradient-text mb-4">Discover Amazing Opportunities</h1>
+            <p className="text-xl text-foreground/70 max-w-3xl mx-auto">
+              Find internships, research programs, competitions, and scholarships tailored to your interests and career goals.
+            </p>
+          </div>
+          
+          {/* Add Opportunity Button */}
+          <div className="text-center">
+            <Button 
+              onClick={() => setIsAddModalOpen(true)}
+              size="lg"
+              className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white"
+            >
+              <Plus className="mr-2" size={20} />
+              Add Opportunity
+            </Button>
+          </div>
         </div>
       </section>
 
@@ -192,7 +215,7 @@ const Opportunities = () => {
         <div className="max-w-7xl mx-auto">
           <div className="mb-6">
             <p className="text-foreground/70">
-              Showing {filteredOpportunities.length} of {allOpportunities.length} opportunities
+              Showing {filteredOpportunities.length} of {opportunities.length} opportunities
             </p>
           </div>
 
@@ -222,6 +245,12 @@ const Opportunities = () => {
           )}
         </div>
       </section>
+
+      <AddOpportunityModal 
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSubmit={addOpportunity}
+      />
 
       <Footer />
     </div>
