@@ -5,55 +5,26 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { MessageSquare, Users, Calendar, Plus, Search, Filter, Heart, Share, MoreHorizontal, Image, Video, FileText } from 'lucide-react';
+import { MessageSquare, Users, Calendar, Plus, Search, Filter, Heart, Share, MoreHorizontal, Image, Video, FileText, LogOut } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { usePosts } from '@/hooks/usePosts';
+import { useNavigate } from 'react-router-dom';
 
 const Community = () => {
   const { toast } = useToast();
+  const { user, loading: authLoading, signOut } = useAuth();
+  const { posts, loading: postsLoading, createPost, toggleLike, toggleRepost } = usePosts();
   const [newPost, setNewPost] = useState('');
-  const [posts, setPosts] = useState([
-    {
-      id: 1,
-      author: "Sarah Chen",
-      avatar: "SC",
-      time: "2 hours ago",
-      content: "Just landed my first internship at Google! Thanks to everyone in this community for the support and advice. Here's what worked for me in the application process...",
-      likes: 89,
-      comments: 24,
-      reposts: 12,
-      liked: false,
-      type: "post",
-      tags: ["internship", "google", "career"]
-    },
-    {
-      id: 2,
-      author: "Michael Rodriguez",
-      avatar: "MR",
-      time: "4 hours ago",
-      content: "Quick question: Has anyone here taken the new CS170 algorithms course? Looking for study partners and wondering about the workload.",
-      likes: 15,
-      comments: 8,
-      reposts: 2,
-      liked: true,
-      type: "question",
-      tags: ["study", "algorithms", "cs170"]
-    },
-    {
-      id: 3,
-      author: "Emily Watson",
-      avatar: "EW",
-      time: "6 hours ago",
-      content: "PSA: Applications for the Stanford Summer Research Program are due next week! Don't miss out - it's an incredible opportunity. Link in comments 👇",
-      likes: 134,
-      comments: 31,
-      reposts: 45,
-      liked: false,
-      type: "announcement",
-      tags: ["stanford", "research", "summer"]
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/auth');
     }
-  ]);
+  }, [user, authLoading, navigate]);
 
   const discussionCategories = [
     { name: "Tech Careers", count: 1247, color: "bg-blue-500/20 text-blue-400" },
@@ -64,50 +35,43 @@ const Community = () => {
     { name: "General", count: 2341, color: "bg-gray-500/20 text-gray-400" }
   ];
 
-  const handleCreatePost = () => {
+  const handleCreatePost = async () => {
     if (!newPost.trim()) return;
-
-    const post = {
-      id: posts.length + 1,
-      author: "You",
-      avatar: "YO",
-      time: "now",
-      content: newPost,
-      likes: 0,
-      comments: 0,
-      reposts: 0,
-      liked: false,
-      type: "post",
-      tags: []
-    };
-
-    setPosts([post, ...posts]);
+    await createPost(newPost);
     setNewPost('');
-    toast({
-      title: "Post shared!",
-      description: "Your post has been shared with the community.",
-    });
   };
 
-  const handleLike = (postId: number) => {
-    setPosts(posts.map(post => 
-      post.id === postId 
-        ? { ...post, liked: !post.liked, likes: post.liked ? post.likes - 1 : post.likes + 1 }
-        : post
-    ));
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
   };
 
-  const handleRepost = (postId: number) => {
-    setPosts(posts.map(post => 
-      post.id === postId 
-        ? { ...post, reposts: post.reposts + 1 }
-        : post
-    ));
-    toast({
-      title: "Post shared!",
-      description: "You've reposted this to your timeline.",
-    });
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return 'now';
+    if (diffInHours < 24) return `${diffInHours} hours ago`;
+    return `${Math.floor(diffInHours / 24)} days ago`;
   };
+
+  const getInitials = (name: string | null) => {
+    if (!name) return 'U';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen">
@@ -117,7 +81,17 @@ const Community = () => {
       <section className="pt-24 pb-12 px-4 bg-gradient-to-b from-background to-background/80">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="gradient-text mb-4">Student Community</h1>
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="gradient-text">Student Community</h1>
+              <Button
+                onClick={handleSignOut}
+                variant="outline"
+                className="border-white/20"
+              >
+                <LogOut className="mr-2" size={16} />
+                Sign Out
+              </Button>
+            </div>
             <p className="text-xl text-foreground/70 max-w-2xl mx-auto mb-8">
               Share your journey, connect with peers, and discover opportunities together.
             </p>
@@ -145,8 +119,8 @@ const Community = () => {
               <div className="text-sm text-foreground/60">Active Members</div>
             </div>
             <div className="glass rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-primary mb-1">1,834</div>
-              <div className="text-sm text-foreground/60">Posts This Week</div>
+              <div className="text-2xl font-bold text-primary mb-1">{posts.length}</div>
+              <div className="text-sm text-foreground/60">Total Posts</div>
             </div>
             <div className="glass rounded-lg p-4 text-center">
               <div className="text-2xl font-bold text-primary mb-1">592</div>
@@ -193,7 +167,7 @@ const Community = () => {
                 <CardHeader className="pb-3">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center text-white font-semibold">
-                      YO
+                      {getInitials(user.user_metadata?.full_name)}
                     </div>
                     <div className="flex-1">
                       <Textarea
@@ -233,73 +207,73 @@ const Community = () => {
               </Card>
 
               {/* Posts Feed */}
-              <div className="space-y-4">
-                {posts.map((post) => (
-                  <Card key={post.id} className="glass border-white/20">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center text-white font-semibold">
-                            {post.avatar}
+              {postsLoading ? (
+                <div className="text-center py-8">Loading posts...</div>
+              ) : (
+                <div className="space-y-4">
+                  {posts.map((post) => {
+                    const isLiked = post.post_likes.some(like => like.user_id === user.id);
+                    const isReposted = post.reposts.some(repost => repost.user_id === user.id);
+                    
+                    return (
+                      <Card key={post.id} className="glass border-white/20">
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center text-white font-semibold">
+                                {getInitials(post.profiles?.full_name)}
+                              </div>
+                              <div>
+                                <h4 className="font-semibold text-foreground">
+                                  {post.profiles?.full_name || 'Anonymous'}
+                                </h4>
+                                <p className="text-sm text-foreground/60">{formatTimeAgo(post.created_at)}</p>
+                              </div>
+                            </div>
+                            <Button variant="ghost" size="sm">
+                              <MoreHorizontal size={16} />
+                            </Button>
                           </div>
-                          <div>
-                            <h4 className="font-semibold text-foreground">{post.author}</h4>
-                            <p className="text-sm text-foreground/60">{post.time}</p>
-                          </div>
-                        </div>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal size={16} />
-                        </Button>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <p className="text-foreground/80 mb-4 leading-relaxed">{post.content}</p>
-                      
-                      {/* Tags */}
-                      {post.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {post.tags.map((tag, index) => (
-                            <Badge key={index} variant="secondary" className="bg-primary/20 text-primary border-primary/30">
-                              #{tag}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
+                        </CardHeader>
+                        <CardContent className="pt-0">
+                          <p className="text-foreground/80 mb-4 leading-relaxed">{post.content}</p>
 
-                      {/* Post Actions */}
-                      <div className="flex items-center justify-between pt-3 border-t border-white/10">
-                        <div className="flex items-center space-x-6">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => handleLike(post.id)}
-                            className={`text-foreground/60 hover:text-red-400 ${post.liked ? 'text-red-400' : ''}`}
-                          >
-                            <Heart size={16} className={`mr-2 ${post.liked ? 'fill-current' : ''}`} />
-                            {post.likes}
-                          </Button>
-                          <Button variant="ghost" size="sm" className="text-foreground/60 hover:text-primary">
-                            <MessageSquare size={16} className="mr-2" />
-                            {post.comments}
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => handleRepost(post.id)}
-                            className="text-foreground/60 hover:text-green-400"
-                          >
-                            <Share size={16} className="mr-2" />
-                            {post.reposts}
-                          </Button>
-                        </div>
-                        <Badge variant="outline" className="text-xs border-white/20 capitalize">
-                          {post.type}
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                          {/* Post Actions */}
+                          <div className="flex items-center justify-between pt-3 border-t border-white/10">
+                            <div className="flex items-center space-x-6">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => toggleLike(post.id)}
+                                className={`text-foreground/60 hover:text-red-400 ${isLiked ? 'text-red-400' : ''}`}
+                              >
+                                <Heart size={16} className={`mr-2 ${isLiked ? 'fill-current' : ''}`} />
+                                {post.post_likes.length}
+                              </Button>
+                              <Button variant="ghost" size="sm" className="text-foreground/60 hover:text-primary">
+                                <MessageSquare size={16} className="mr-2" />
+                                {post.comments.length}
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => toggleRepost(post.id)}
+                                className={`text-foreground/60 hover:text-green-400 ${isReposted ? 'text-green-400' : ''}`}
+                              >
+                                <Share size={16} className="mr-2" />
+                                {post.reposts.length}
+                              </Button>
+                            </div>
+                            <Badge variant="outline" className="text-xs border-white/20 capitalize">
+                              {post.post_type}
+                            </Badge>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
 
               {/* Load More */}
               <div className="text-center mt-8">
