@@ -31,7 +31,7 @@ export const usePosts = () => {
         .from('posts')
         .select(`
           *,
-          profiles:user_id (full_name, username),
+          profiles!posts_user_id_fkey (full_name, username),
           post_likes (user_id),
           comments (id),
           reposts (user_id)
@@ -39,7 +39,14 @@ export const usePosts = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setPosts(data || []);
+      
+      // Type casting to ensure post_type is correctly typed
+      const typedPosts = (data || []).map(post => ({
+        ...post,
+        post_type: post.post_type as 'post' | 'question' | 'announcement'
+      })) as Post[];
+      
+      setPosts(typedPosts);
     } catch (error: any) {
       toast({
         title: "Error loading posts",
