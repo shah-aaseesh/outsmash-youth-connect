@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -31,7 +30,7 @@ export const usePosts = () => {
         .from('posts')
         .select(`
           *,
-          profiles!posts_user_id_fkey (full_name, username),
+          profiles!user_id (full_name, username),
           post_likes (user_id),
           comments (id),
           reposts (user_id)
@@ -40,13 +39,7 @@ export const usePosts = () => {
 
       if (error) throw error;
       
-      // Type casting to ensure post_type is correctly typed
-      const typedPosts = (data || []).map(post => ({
-        ...post,
-        post_type: post.post_type as 'post' | 'question' | 'announcement'
-      })) as Post[];
-      
-      setPosts(typedPosts);
+      setPosts(data || []);
     } catch (error: any) {
       toast({
         title: "Error loading posts",
