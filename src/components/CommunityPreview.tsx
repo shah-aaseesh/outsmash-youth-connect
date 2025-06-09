@@ -8,7 +8,6 @@ const CommunityPreview = () => {
     {
       title: "Just landed my first internship at Google!",
       author: "Sarah Chen",
-      group: "Tech Careers",
       replies: 24,
       likes: 89,
       time: "2 hours ago",
@@ -17,7 +16,6 @@ const CommunityPreview = () => {
     {
       title: "Looking for study partners for SAT prep",
       author: "Michael Rodriguez",
-      group: "Study Groups",
       replies: 12,
       likes: 31,
       time: "5 hours ago",
@@ -26,7 +24,6 @@ const CommunityPreview = () => {
     {
       title: "My experience at Stanford Summer Program",
       author: "Emily Watson",
-      group: "Summer Programs",
       replies: 18,
       likes: 67,
       time: "1 day ago",
@@ -80,10 +77,6 @@ const CommunityPreview = () => {
                         <h4 className="font-semibold text-foreground mb-1">{post.title}</h4>
                         <div className="flex items-center space-x-3 text-sm text-foreground/60">
                           <span>{post.author}</span>
-                          <span>•</span>
-                          <Badge variant="outline" className="text-xs border-white/20">
-                            {post.group}
-                          </Badge>
                           <span>•</span>
                           <span>{post.time}</span>
                         </div>
