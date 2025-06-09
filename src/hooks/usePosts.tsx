@@ -27,26 +27,63 @@ export const usePosts = () => {
 
   const fetchPosts = async () => {
     try {
-      const { data, error } = await supabase
+      // First get posts
+      const { data: postsData, error: postsError } = await supabase
         .from('posts')
-        .select(`
-          *,
-          profiles (full_name, username),
-          post_likes (user_id),
-          comments (id),
-          reposts (user_id)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (postsError) throw postsError;
+
+      // Get profiles separately
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, full_name, username');
+
+      if (profilesError) throw profilesError;
+
+      // Get post likes
+      const { data: likesData, error: likesError } = await supabase
+        .from('post_likes')
+        .select('post_id, user_id');
+
+      if (likesError) throw likesError;
+
+      // Get comments
+      const { data: commentsData, error: commentsError } = await supabase
+        .from('comments')
+        .select('id, post_id');
+
+      if (commentsError) throw commentsError;
+
+      // Get reposts
+      const { data: repostsData, error: repostsError } = await supabase
+        .from('reposts')
+        .select('post_id, user_id');
+
+      if (repostsError) throw repostsError;
+
+      // Combine all data
+      const combinedPosts = (postsData || []).map(post => {
+        const profile = profilesData?.find(p => p.id === post.user_id) || null;
+        const postLikes = likesData?.filter(l => l.post_id === post.id) || [];
+        const comments = commentsData?.filter(c => c.post_id === post.id) || [];
+        const reposts = repostsData?.filter(r => r.post_id === post.id) || [];
+
+        return {
+          ...post,
+          post_type: (post.post_type || 'post') as 'post' | 'question' | 'announcement',
+          profiles: profile ? {
+            full_name: profile.full_name,
+            username: profile.username
+          } : null,
+          post_likes: postLikes.map(l => ({ user_id: l.user_id })),
+          comments: comments.map(c => ({ id: c.id })),
+          reposts: reposts.map(r => ({ user_id: r.user_id }))
+        };
+      });
       
-      // Type cast the data to ensure post_type matches our interface
-      const typedPosts = (data || []).map(post => ({
-        ...post,
-        post_type: (post.post_type || 'post') as 'post' | 'question' | 'announcement'
-      })) as Post[];
-      
-      setPosts(typedPosts);
+      setPosts(combinedPosts);
     } catch (error: any) {
       console.log('Error fetching posts:', error);
       toast({
