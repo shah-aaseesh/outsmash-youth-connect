@@ -53,9 +53,15 @@ export const useFollows = () => {
 
   const followUser = async (followingId: string) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
       const { error } = await supabase
         .from('follows')
-        .insert({ following_id: followingId });
+        .insert({ 
+          follower_id: user.id,
+          following_id: followingId 
+        });
 
       if (error) throw error;
       
@@ -77,9 +83,13 @@ export const useFollows = () => {
 
   const unfollowUser = async (followingId: string) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
       const { error } = await supabase
         .from('follows')
         .delete()
+        .eq('follower_id', user.id)
         .eq('following_id', followingId);
 
       if (error) throw error;
@@ -101,7 +111,10 @@ export const useFollows = () => {
   };
 
   const isFollowing = (userId: string) => {
-    return follows.some(follow => follow.following_id === userId);
+    const { data: { user } } = supabase.auth.getUser();
+    return follows.some(follow => 
+      follow.follower_id === user?.id && follow.following_id === userId
+    );
   };
 
   useEffect(() => {

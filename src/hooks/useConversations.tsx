@@ -75,6 +75,9 @@ export const useConversations = () => {
 
   const createDirectMessage = async (userId: string) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
       // Check if DM already exists
       const { data: existingConversation } = await supabase
         .from('conversations')
@@ -86,7 +89,8 @@ export const useConversations = () => {
 
       const existing = existingConversation?.find(conv => 
         conv.participants.length === 2 &&
-        conv.participants.some(p => p.user_id === userId)
+        conv.participants.some(p => p.user_id === userId) &&
+        conv.participants.some(p => p.user_id === user.id)
       );
 
       if (existing) {
@@ -96,7 +100,10 @@ export const useConversations = () => {
       // Create new DM
       const { data: conversation, error: convError } = await supabase
         .from('conversations')
-        .insert({ is_group: false })
+        .insert({ 
+          is_group: false,
+          created_by: user.id 
+        })
         .select()
         .single();
 
@@ -107,7 +114,7 @@ export const useConversations = () => {
         .from('conversation_participants')
         .insert([
           { conversation_id: conversation.id, user_id: userId },
-          { conversation_id: conversation.id, user_id: (await supabase.auth.getUser()).data.user?.id }
+          { conversation_id: conversation.id, user_id: user.id }
         ]);
 
       if (participantError) throw participantError;
@@ -126,17 +133,23 @@ export const useConversations = () => {
 
   const createGroup = async (name: string, userIds: string[]) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
       const { data: conversation, error: convError } = await supabase
         .from('conversations')
-        .insert({ name, is_group: true })
+        .insert({ 
+          name, 
+          is_group: true,
+          created_by: user.id 
+        })
         .select()
         .single();
 
       if (convError) throw convError;
 
-      const currentUserId = (await supabase.auth.getUser()).data.user?.id;
       const participants = [
-        { conversation_id: conversation.id, user_id: currentUserId, is_admin: true },
+        { conversation_id: conversation.id, user_id: user.id, is_admin: true },
         ...userIds.map(userId => ({ 
           conversation_id: conversation.id, 
           user_id: userId, 
@@ -169,11 +182,15 @@ export const useConversations = () => {
 
   const sendMessage = async (conversationId: string, content: string) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
       const { error } = await supabase
         .from('messages')
         .insert({
           conversation_id: conversationId,
           content,
+          sender_id: user.id,
         });
 
       if (error) throw error;
