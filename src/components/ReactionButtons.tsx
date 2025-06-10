@@ -1,6 +1,6 @@
 
 import { Button } from '@/components/ui/button';
-import { ThumbsUp, Heart, Laugh, Angry, Sad } from 'lucide-react';
+import { ThumbsUp, Heart, Smile, Angry, Frown } from 'lucide-react';
 
 interface ReactionButtonsProps {
   postId: string;
@@ -13,9 +13,9 @@ const ReactionButtons = ({ postId, isLiked, likesCount, onToggleLike }: Reaction
   const reactions = [
     { type: 'like', icon: ThumbsUp, label: 'Like', color: 'text-blue-500' },
     { type: 'love', icon: Heart, label: 'Love', color: 'text-red-500' },
-    { type: 'laugh', icon: Laugh, label: 'Laugh', color: 'text-yellow-500' },
+    { type: 'laugh', icon: Smile, label: 'Laugh', color: 'text-yellow-500' },
     { type: 'angry', icon: Angry, label: 'Angry', color: 'text-red-600' },
-    { type: 'sad', icon: Sad, label: 'Sad', color: 'text-gray-500' }
+    { type: 'sad', icon: Frown, label: 'Sad', color: 'text-gray-500' }
   ];
 
   return (
