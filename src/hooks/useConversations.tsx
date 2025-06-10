@@ -10,57 +10,83 @@ export interface Conversation {
   created_by: string | null;
   created_at: string;
   updated_at: string;
-  participants: Array<{
-    id: string;
-    user_id: string;
-    is_admin: boolean;
-    profiles: {
-      full_name: string | null;
-      username: string | null;
-      avatar_url: string | null;
-    };
-  }>;
-  messages: Array<{
-    id: string;
-    content: string;
-    sender_id: string;
-    created_at: string;
-    profiles: {
-      full_name: string | null;
-      username: string | null;
-    };
-  }>;
+}
+
+export interface ConversationParticipant {
+  id: string;
+  conversation_id: string;
+  user_id: string;
+  is_admin: boolean;
+  joined_at: string;
+}
+
+export interface Message {
+  id: string;
+  conversation_id: string;
+  sender_id: string;
+  content: string;
+  message_type: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export const useConversations = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [participants, setParticipants] = useState<ConversationParticipant[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   const fetchConversations = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Fetch conversations where user is a participant
+      const { data: userParticipations } = await supabase
+        .from('conversation_participants')
+        .select('conversation_id')
+        .eq('user_id', user.id);
+
+      if (!userParticipations) return;
+
+      const conversationIds = userParticipations.map(p => p.conversation_id);
+
+      if (conversationIds.length === 0) {
+        setConversations([]);
+        setLoading(false);
+        return;
+      }
+
+      // Fetch conversations
+      const { data: conversationsData, error: convError } = await supabase
         .from('conversations')
-        .select(`
-          *,
-          participants:conversation_participants(
-            id,
-            user_id,
-            is_admin,
-            profiles(full_name, username, avatar_url)
-          ),
-          messages(
-            id,
-            content,
-            sender_id,
-            created_at,
-            profiles(full_name, username)
-          )
-        `)
+        .select('*')
+        .in('id', conversationIds)
         .order('updated_at', { ascending: false });
 
-      if (error) throw error;
-      setConversations(data || []);
+      if (convError) throw convError;
+
+      // Fetch all participants
+      const { data: participantsData, error: partError } = await supabase
+        .from('conversation_participants')
+        .select('*')
+        .in('conversation_id', conversationIds);
+
+      if (partError) throw partError;
+
+      // Fetch all messages
+      const { data: messagesData, error: msgError } = await supabase
+        .from('messages')
+        .select('*')
+        .in('conversation_id', conversationIds)
+        .order('created_at', { ascending: true });
+
+      if (msgError) throw msgError;
+
+      setConversations(conversationsData || []);
+      setParticipants(participantsData || []);
+      setMessages(messagesData || []);
     } catch (error) {
       console.error('Error fetching conversations:', error);
       toast({
@@ -79,22 +105,25 @@ export const useConversations = () => {
       if (!user) throw new Error('Not authenticated');
 
       // Check if DM already exists
-      const { data: existingConversation } = await supabase
-        .from('conversations')
-        .select(`
-          id,
-          participants:conversation_participants(user_id)
-        `)
-        .eq('is_group', false);
+      const { data: existingParticipations } = await supabase
+        .from('conversation_participants')
+        .select('conversation_id')
+        .eq('user_id', user.id);
 
-      const existing = existingConversation?.find(conv => 
-        conv.participants.length === 2 &&
-        conv.participants.some(p => p.user_id === userId) &&
-        conv.participants.some(p => p.user_id === user.id)
-      );
+      if (existingParticipations) {
+        for (const participation of existingParticipations) {
+          const { data: allParticipants } = await supabase
+            .from('conversation_participants')
+            .select('user_id')
+            .eq('conversation_id', participation.conversation_id);
 
-      if (existing) {
-        return existing.id;
+          if (allParticipants && allParticipants.length === 2) {
+            const userIds = allParticipants.map(p => p.user_id);
+            if (userIds.includes(userId) && userIds.includes(user.id)) {
+              return participation.conversation_id;
+            }
+          }
+        }
       }
 
       // Create new DM
@@ -148,7 +177,7 @@ export const useConversations = () => {
 
       if (convError) throw convError;
 
-      const participants = [
+      const participantData = [
         { conversation_id: conversation.id, user_id: user.id, is_admin: true },
         ...userIds.map(userId => ({ 
           conversation_id: conversation.id, 
@@ -159,7 +188,7 @@ export const useConversations = () => {
 
       const { error: participantError } = await supabase
         .from('conversation_participants')
-        .insert(participants);
+        .insert(participantData);
 
       if (participantError) throw participantError;
 
@@ -212,16 +241,28 @@ export const useConversations = () => {
     }
   };
 
+  const getConversationParticipants = (conversationId: string) => {
+    return participants.filter(p => p.conversation_id === conversationId);
+  };
+
+  const getConversationMessages = (conversationId: string) => {
+    return messages.filter(m => m.conversation_id === conversationId);
+  };
+
   useEffect(() => {
     fetchConversations();
   }, []);
 
   return {
     conversations,
+    participants,
+    messages,
     loading,
     createDirectMessage,
     createGroup,
     sendMessage,
+    getConversationParticipants,
+    getConversationMessages,
     refetch: fetchConversations,
   };
 };

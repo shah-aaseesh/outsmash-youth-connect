@@ -14,8 +14,6 @@ interface UserProfileProps {
   username: string | null;
   bio: string | null;
   avatarUrl: string | null;
-  followersCount?: number;
-  followingCount?: number;
 }
 
 const UserProfile = ({ 
@@ -23,17 +21,17 @@ const UserProfile = ({
   fullName, 
   username, 
   bio, 
-  avatarUrl,
-  followersCount = 0,
-  followingCount = 0 
+  avatarUrl
 }: UserProfileProps) => {
   const { user } = useAuth();
-  const { followUser, unfollowUser, isFollowing } = useFollows();
+  const { followUser, unfollowUser, isFollowing, getFollowersCount, getFollowingCount } = useFollows();
   const { createDirectMessage } = useConversations();
   const navigate = useNavigate();
 
   const isCurrentUser = user?.id === userId;
   const following = isFollowing(userId);
+  const followersCount = getFollowersCount(userId);
+  const followingCount = getFollowingCount(userId);
 
   const handleFollow = () => {
     if (following) {

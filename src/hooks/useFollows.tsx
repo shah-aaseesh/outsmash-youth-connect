@@ -8,34 +8,27 @@ export interface Follow {
   follower_id: string;
   following_id: string;
   created_at: string;
-  follower?: {
-    id: string;
-    full_name: string | null;
-    username: string | null;
-    avatar_url: string | null;
-  };
-  following?: {
-    id: string;
-    full_name: string | null;
-    username: string | null;
-    avatar_url: string | null;
-  };
 }
 
 export const useFollows = () => {
   const [follows, setFollows] = useState<Follow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUserId(user?.id || null);
+    };
+    getCurrentUser();
+  }, []);
 
   const fetchFollows = async () => {
     try {
       const { data, error } = await supabase
         .from('follows')
-        .select(`
-          *,
-          follower:profiles!follows_follower_id_fkey(*),
-          following:profiles!follows_following_id_fkey(*)
-        `);
+        .select('*');
 
       if (error) throw error;
       setFollows(data || []);
@@ -111,10 +104,18 @@ export const useFollows = () => {
   };
 
   const isFollowing = (userId: string) => {
-    const { data: { user } } = supabase.auth.getUser();
+    if (!currentUserId) return false;
     return follows.some(follow => 
-      follow.follower_id === user?.id && follow.following_id === userId
+      follow.follower_id === currentUserId && follow.following_id === userId
     );
+  };
+
+  const getFollowersCount = (userId: string) => {
+    return follows.filter(follow => follow.following_id === userId).length;
+  };
+
+  const getFollowingCount = (userId: string) => {
+    return follows.filter(follow => follow.follower_id === userId).length;
   };
 
   useEffect(() => {
@@ -127,6 +128,8 @@ export const useFollows = () => {
     followUser,
     unfollowUser,
     isFollowing,
+    getFollowersCount,
+    getFollowingCount,
     refetch: fetchFollows,
   };
 };
