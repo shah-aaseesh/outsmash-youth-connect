@@ -96,8 +96,6 @@ const Profile = () => {
   };
 
   const userPosts = posts.filter(post => post.user_id === targetUserId);
-  const followerCount = follows.filter(follow => follow.following_id === targetUserId).length;
-  const followingCount = follows.filter(follow => follow.follower_id === targetUserId).length;
 
   if (authLoading || loading) {
     return (
@@ -126,8 +124,6 @@ const Profile = () => {
                 username={profileData?.username}
                 bio={profileData?.bio}
                 avatarUrl={profileData?.avatar_url}
-                followersCount={followerCount}
-                followingCount={followingCount}
               />
 
               {isCurrentUser && (
