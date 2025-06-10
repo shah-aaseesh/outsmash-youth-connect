@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Menu, X, User } from 'lucide-react';
+import { Menu, X, User, MessageSquare, UserCircle } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -52,7 +52,23 @@ const Navigation = () => {
             </Link>
             
             {user ? (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-4">
+                <Link 
+                  to="/messages" 
+                  className={`text-foreground/80 hover:text-primary transition-colors ${
+                    isActive('/messages') ? 'text-primary' : ''
+                  }`}
+                >
+                  <MessageSquare size={20} />
+                </Link>
+                <Link 
+                  to="/profile" 
+                  className={`text-foreground/80 hover:text-primary transition-colors ${
+                    isActive('/profile') ? 'text-primary' : ''
+                  }`}
+                >
+                  <UserCircle size={20} />
+                </Link>
                 <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center">
                   <span className="text-white text-sm font-semibold">
                     {user.user_metadata?.full_name?.split(' ').map((n: string) => n[0]).join('') || 'U'}
@@ -114,7 +130,28 @@ const Navigation = () => {
                 Community
               </Link>
               
-              {!user && (
+              {user ? (
+                <>
+                  <Link
+                    to="/messages"
+                    className={`block px-3 py-2 text-foreground/80 hover:text-primary transition-colors ${
+                      isActive('/messages') ? 'text-primary' : ''
+                    }`}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Messages
+                  </Link>
+                  <Link
+                    to="/profile"
+                    className={`block px-3 py-2 text-foreground/80 hover:text-primary transition-colors ${
+                      isActive('/profile') ? 'text-primary' : ''
+                    }`}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Profile
+                  </Link>
+                </>
+              ) : (
                 <Link
                   to="/auth"
                   className="block px-3 py-2"
