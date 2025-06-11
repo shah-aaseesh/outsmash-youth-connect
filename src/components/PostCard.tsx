@@ -1,9 +1,11 @@
+
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { MessageSquare, Share, MoreHorizontal } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ReactionButtons from './ReactionButtons';
 import { Post } from '@/hooks/usePosts';
 
@@ -30,6 +32,7 @@ const PostCard = ({
 }: PostCardProps) => {
   const [commentInput, setCommentInput] = useState('');
   const [showComments, setShowComments] = useState(false);
+  const navigate = useNavigate();
 
   const isLiked = post.post_likes.some(like => like.user_id === currentUserId);
   const isReposted = post.reposts.some(repost => repost.user_id === currentUserId);
@@ -44,16 +47,30 @@ const PostCard = ({
     setShowComments(!showComments);
   };
 
+  const handleUserClick = () => {
+    if (post.user_id === currentUserId) {
+      navigate('/profile');
+    } else {
+      navigate(`/profile/${post.user_id}`);
+    }
+  };
+
   return (
     <Card className="glass border-white/20">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center text-white font-semibold">
+            <div 
+              className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center text-white font-semibold cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={handleUserClick}
+            >
               {getInitials(post.profiles?.full_name)}
             </div>
             <div>
-              <h4 className="font-semibold text-foreground">
+              <h4 
+                className="font-semibold text-foreground cursor-pointer hover:text-primary transition-colors"
+                onClick={handleUserClick}
+              >
                 {post.profiles?.full_name || 'Anonymous'}
               </h4>
               <p className="text-sm text-foreground/60">{formatTimeAgo(post.created_at)}</p>
