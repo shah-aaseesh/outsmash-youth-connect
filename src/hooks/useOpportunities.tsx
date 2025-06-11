@@ -71,11 +71,11 @@ export const useOpportunities = () => {
     }
   };
 
-  const createOpportunity = async (opportunityData: Partial<Opportunity>) => {
+  const createOpportunity = async (opportunityData: Omit<Opportunity, 'id' | 'created_at' | 'updated_at'>) => {
     try {
       const { error } = await supabase
         .from('opportunities')
-        .insert([opportunityData]);
+        .insert(opportunityData);
 
       if (error) throw error;
 

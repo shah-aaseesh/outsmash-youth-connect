@@ -6,6 +6,7 @@ import { ArrowRight } from 'lucide-react';
 const OpportunitiesSection = () => {
   const opportunities = [
     {
+      id: "demo-1",
       title: "Software Engineering Intern",
       company: "TechStart Inc.",
       type: "Internship",
@@ -17,6 +18,7 @@ const OpportunitiesSection = () => {
       deadline: "Dec 15, 2024"
     },
     {
+      id: "demo-2",
       title: "NASA USRP Research Program",
       company: "NASA",
       type: "Research",
@@ -28,6 +30,7 @@ const OpportunitiesSection = () => {
       deadline: "Jan 31, 2025"
     },
     {
+      id: "demo-3",
       title: "Global Youth Leadership Summit",
       company: "United Nations",
       type: "Program",
