@@ -1,256 +1,318 @@
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { toast } from '@/hooks/use-toast';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Plus, X } from 'lucide-react';
+import { useOpportunities } from '@/hooks/useOpportunities';
 
-const opportunitySchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  company: z.string().min(1, 'Company is required'),
-  type: z.string().min(1, 'Type is required'),
-  location: z.string().min(1, 'Location is required'),
-  duration: z.string().min(1, 'Duration is required'),
-  description: z.string().min(10, 'Description must be at least 10 characters'),
-  deadline: z.string().min(1, 'Deadline is required'),
-  tags: z.string().min(1, 'At least one tag is required'),
-});
-
-type OpportunityFormData = z.infer<typeof opportunitySchema>;
-
-interface AddOpportunityModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (opportunity: any) => void;
-}
-
-const AddOpportunityModal = ({ isOpen, onClose, onSubmit }: AddOpportunityModalProps) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const form = useForm<OpportunityFormData>({
-    resolver: zodResolver(opportunitySchema),
-    defaultValues: {
-      title: '',
-      company: '',
-      type: '',
-      location: '',
-      duration: '',
-      description: '',
-      deadline: '',
-      tags: '',
-    },
+const AddOpportunityModal = () => {
+  const [open, setOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    title: '',
+    company: '',
+    type: '',
+    location: '',
+    duration: '',
+    deadline: '',
+    description: '',
+    full_description: '',
+    application_process: '',
+    company_info: '',
+    apply_url: '',
   });
+  const [requirements, setRequirements] = useState<string[]>([]);
+  const [benefits, setBenefits] = useState<string[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
+  const [newRequirement, setNewRequirement] = useState('');
+  const [newBenefit, setNewBenefit] = useState('');
+  const [newTag, setNewTag] = useState('');
 
-  const handleSubmit = async (data: OpportunityFormData) => {
-    setIsSubmitting(true);
+  const { createOpportunity } = useOpportunities();
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const addRequirement = () => {
+    if (newRequirement.trim()) {
+      setRequirements([...requirements, newRequirement.trim()]);
+      setNewRequirement('');
+    }
+  };
+
+  const removeRequirement = (index: number) => {
+    setRequirements(requirements.filter((_, i) => i !== index));
+  };
+
+  const addBenefit = () => {
+    if (newBenefit.trim()) {
+      setBenefits([...benefits, newBenefit.trim()]);
+      setNewBenefit('');
+    }
+  };
+
+  const removeBenefit = (index: number) => {
+    setBenefits(benefits.filter((_, i) => i !== index));
+  };
+
+  const addTag = () => {
+    if (newTag.trim()) {
+      setTags([...tags, newTag.trim()]);
+      setNewTag('');
+    }
+  };
+
+  const removeTag = (index: number) => {
+    setTags(tags.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
-    try {
-      const opportunity = {
-        ...data,
-        tags: data.tags.split(',').map(tag => tag.trim()),
-      };
-      
-      onSubmit(opportunity);
-      
-      toast({
-        title: "Success!",
-        description: "Your opportunity has been added successfully.",
+    const opportunityData = {
+      ...formData,
+      requirements,
+      benefits,
+      tags,
+    };
+
+    const success = await createOpportunity(opportunityData);
+    if (success) {
+      setOpen(false);
+      // Reset form
+      setFormData({
+        title: '',
+        company: '',
+        type: '',
+        location: '',
+        duration: '',
+        deadline: '',
+        description: '',
+        full_description: '',
+        application_process: '',
+        company_info: '',
+        apply_url: '',
       });
-      
-      form.reset();
-      onClose();
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add opportunity. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
+      setRequirements([]);
+      setBenefits([]);
+      setTags([]);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="bg-gradient-to-r from-primary to-accent hover:opacity-90">
+          <Plus className="mr-2" size={16} />
+          Add Opportunity
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Add New Opportunity</DialogTitle>
+          <DialogTitle>Add New Opportunity</DialogTitle>
         </DialogHeader>
         
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Title *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. Software Engineering Intern" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="company"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Company/Organization *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. TechStart Inc." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="title">Title *</Label>
+              <Input
+                id="title"
+                value={formData.title}
+                onChange={(e) => handleInputChange('title', e.target.value)}
+                required
               />
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <FormField
-                control={form.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Type *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Internship">Internship</SelectItem>
-                        <SelectItem value="Research">Research</SelectItem>
-                        <SelectItem value="Program">Program</SelectItem>
-                        <SelectItem value="Competition">Competition</SelectItem>
-                        <SelectItem value="Scholarship">Scholarship</SelectItem>
-                        <SelectItem value="Fellowship">Fellowship</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Location *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. Remote, California" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="duration"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Duration *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. 3 months, 10 weeks" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+            <div>
+              <Label htmlFor="company">Company *</Label>
+              <Input
+                id="company"
+                value={formData.company}
+                onChange={(e) => handleInputChange('company', e.target.value)}
+                required
               />
             </div>
+            <div>
+              <Label htmlFor="type">Type *</Label>
+              <Input
+                id="type"
+                value={formData.type}
+                onChange={(e) => handleInputChange('type', e.target.value)}
+                placeholder="e.g., Internship, Research, Program"
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="location">Location *</Label>
+              <Input
+                id="location"
+                value={formData.location}
+                onChange={(e) => handleInputChange('location', e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="duration">Duration *</Label>
+              <Input
+                id="duration"
+                value={formData.duration}
+                onChange={(e) => handleInputChange('duration', e.target.value)}
+                placeholder="e.g., 3 months, 10 weeks"
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="deadline">Application Deadline *</Label>
+              <Input
+                id="deadline"
+                value={formData.deadline}
+                onChange={(e) => handleInputChange('deadline', e.target.value)}
+                placeholder="e.g., Dec 15, 2024"
+                required
+              />
+            </div>
+          </div>
 
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description *</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Describe the opportunity, requirements, and what participants will gain..."
-                      className="min-h-[100px]"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+          <div>
+            <Label htmlFor="description">Short Description *</Label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) => handleInputChange('description', e.target.value)}
+              placeholder="Brief description for opportunity cards"
+              required
             />
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="deadline"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Application Deadline *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. Dec 15, 2024" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="tags"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Skills/Tags *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. React, Programming, Research (comma-separated)" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+          <div>
+            <Label htmlFor="full_description">About This Opportunity</Label>
+            <Textarea
+              id="full_description"
+              value={formData.full_description}
+              onChange={(e) => handleInputChange('full_description', e.target.value)}
+              placeholder="Detailed description of the opportunity"
+              rows={4}
+            />
+          </div>
 
-            <div className="flex justify-end space-x-4 pt-4">
-              <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={isSubmitting}
-                className="bg-gradient-to-r from-primary to-accent hover:opacity-90"
-              >
-                {isSubmitting ? 'Adding...' : 'Add Opportunity'}
+          <div>
+            <Label htmlFor="company_info">About the Company</Label>
+            <Textarea
+              id="company_info"
+              value={formData.company_info}
+              onChange={(e) => handleInputChange('company_info', e.target.value)}
+              placeholder="Information about the company"
+              rows={3}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="application_process">How to Apply</Label>
+            <Textarea
+              id="application_process"
+              value={formData.application_process}
+              onChange={(e) => handleInputChange('application_process', e.target.value)}
+              placeholder="Application process and instructions"
+              rows={3}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="apply_url">Application URL</Label>
+            <Input
+              id="apply_url"
+              type="url"
+              value={formData.apply_url}
+              onChange={(e) => handleInputChange('apply_url', e.target.value)}
+              placeholder="https://company.com/apply"
+            />
+          </div>
+
+          {/* Requirements Section */}
+          <div>
+            <Label>Requirements</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                value={newRequirement}
+                onChange={(e) => setNewRequirement(e.target.value)}
+                placeholder="Add a requirement"
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addRequirement())}
+              />
+              <Button type="button" onClick={addRequirement} variant="outline">
+                Add
               </Button>
             </div>
-          </form>
-        </Form>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {requirements.map((req, index) => (
+                <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                  {req}
+                  <X size={12} className="cursor-pointer" onClick={() => removeRequirement(index)} />
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          {/* Benefits Section */}
+          <div>
+            <Label>What You'll Get</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                value={newBenefit}
+                onChange={(e) => setNewBenefit(e.target.value)}
+                placeholder="Add a benefit"
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addBenefit())}
+              />
+              <Button type="button" onClick={addBenefit} variant="outline">
+                Add
+              </Button>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {benefits.map((benefit, index) => (
+                <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                  {benefit}
+                  <X size={12} className="cursor-pointer" onClick={() => removeBenefit(index)} />
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          {/* Tags Section */}
+          <div>
+            <Label>Tags</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                value={newTag}
+                onChange={(e) => setNewTag(e.target.value)}
+                placeholder="Add a tag"
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+              />
+              <Button type="button" onClick={addTag} variant="outline">
+                Add
+              </Button>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {tags.map((tag, index) => (
+                <Badge key={index} variant="outline" className="flex items-center gap-1">
+                  {tag}
+                  <X size={12} className="cursor-pointer" onClick={() => removeTag(index)} />
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" className="bg-gradient-to-r from-primary to-accent hover:opacity-90">
+              Create Opportunity
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );
