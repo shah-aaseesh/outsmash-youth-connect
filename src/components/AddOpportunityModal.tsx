@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -6,8 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, AlertCircle } from 'lucide-react';
 import { useOpportunities } from '@/hooks/useOpportunities';
+import { useAuth } from '@/hooks/useAuth';
+import { Link } from 'react-router-dom';
 
 const AddOpportunityModal = () => {
   const [open, setOpen] = useState(false);
@@ -31,7 +32,8 @@ const AddOpportunityModal = () => {
   const [newBenefit, setNewBenefit] = useState('');
   const [newTag, setNewTag] = useState('');
 
-  const { createOpportunity } = useOpportunities();
+  const { createOpportunity, isAuthenticated } = useOpportunities();
+  const { user } = useAuth();
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -73,6 +75,10 @@ const AddOpportunityModal = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!isAuthenticated) {
+      return;
+    }
+    
     const opportunityData = {
       ...formData,
       requirements,
@@ -102,6 +108,37 @@ const AddOpportunityModal = () => {
       setTags([]);
     }
   };
+
+  if (!isAuthenticated) {
+    return (
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button className="bg-gradient-to-r from-primary to-accent hover:opacity-90">
+            <Plus className="mr-2" size={16} />
+            Add Opportunity
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertCircle className="text-amber-500" size={20} />
+              Login Required
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-foreground/70">
+              You need to be logged in to create opportunities.
+            </p>
+            <Link to="/auth">
+              <Button className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90">
+                Sign In / Sign Up
+              </Button>
+            </Link>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

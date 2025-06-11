@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface Opportunity {
   id: string;
@@ -28,6 +29,7 @@ export const useOpportunities = () => {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const fetchOpportunities = async () => {
     try {
@@ -71,11 +73,25 @@ export const useOpportunities = () => {
     }
   };
 
-  const createOpportunity = async (opportunityData: Omit<Opportunity, 'id' | 'created_at' | 'updated_at'>) => {
+  const createOpportunity = async (opportunityData: Omit<Opportunity, 'id' | 'created_at' | 'updated_at' | 'created_by'>) => {
     try {
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "You must be logged in to create opportunities",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      const dataWithUser = {
+        ...opportunityData,
+        created_by: user.id,
+      };
+
       const { error } = await supabase
         .from('opportunities')
-        .insert(opportunityData);
+        .insert(dataWithUser);
 
       if (error) throw error;
 
@@ -90,7 +106,7 @@ export const useOpportunities = () => {
       console.error('Error creating opportunity:', error);
       toast({
         title: "Error",
-        description: "Failed to create opportunity",
+        description: error.message || "Failed to create opportunity",
         variant: "destructive",
       });
       return false;
@@ -107,5 +123,6 @@ export const useOpportunities = () => {
     fetchOpportunities,
     getOpportunityById,
     createOpportunity,
+    isAuthenticated: !!user,
   };
 };
