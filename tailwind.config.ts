@@ -26,22 +26,26 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: 'hsl(265, 89%, 78%)',
+					DEFAULT: 'hsl(218, 100%, 58%)',
 					foreground: 'hsl(var(--primary-foreground))',
-					50: 'hsl(270, 100%, 98%)',
-					100: 'hsl(269, 100%, 95%)',
-					200: 'hsl(269, 100%, 89%)',
-					300: 'hsl(268, 100%, 81%)',
-					400: 'hsl(267, 94%, 73%)',
-					500: 'hsl(265, 89%, 78%)',
-					600: 'hsl(262, 83%, 58%)',
-					700: 'hsl(259, 85%, 48%)',
-					800: 'hsl(256, 84%, 39%)',
-					900: 'hsl(254, 69%, 33%)',
+					50: 'hsl(218, 100%, 95%)',
+					100: 'hsl(218, 100%, 90%)',
+					200: 'hsl(218, 100%, 80%)',
+					300: 'hsl(218, 100%, 70%)',
+					400: 'hsl(218, 100%, 64%)',
+					500: 'hsl(218, 100%, 58%)',
+					600: 'hsl(218, 100%, 52%)',
+					700: 'hsl(218, 100%, 46%)',
+					800: 'hsl(218, 100%, 40%)',
+					900: 'hsl(218, 100%, 34%)',
 				},
 				accent: {
-					DEFAULT: 'hsl(262, 83%, 58%)',
+					DEFAULT: 'hsl(26, 100%, 50%)',
 					foreground: 'hsl(var(--accent-foreground))'
+				},
+				success: {
+					DEFAULT: 'hsl(148, 100%, 39%)',
+					foreground: 'hsl(var(--success-foreground))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -80,7 +84,7 @@ export default {
 				sm: 'calc(var(--radius) - 4px)'
 			},
 			fontFamily: {
-				sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+				sans: ['Poppins', 'Inter', 'ui-sans-serif', 'system-ui'],
 			},
 			backgroundImage: {
 				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

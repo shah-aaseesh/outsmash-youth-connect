@@ -1,49 +1,52 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 10 10% 4%;
-    --foreground: 0 0% 98%;
+    --background: 208 78% 94%;
+    --foreground: 0 0% 13%;
 
-    --card: 0 0% 6%;
-    --card-foreground: 0 0% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 13%;
 
-    --popover: 0 0% 6%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 13%;
 
-    --primary: 265 89% 78%;
-    --primary-foreground: 0 0% 9%;
+    --primary: 218 100% 58%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 208 50% 90%;
+    --secondary-foreground: 0 0% 13%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 63%;
+    --muted: 208 30% 88%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 262 83% 58%;
+    --accent: 26 100% 50%;
     --accent-foreground: 0 0% 98%;
+
+    --success: 148 100% 39%;
+    --success-foreground: 0 0% 98%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 265 89% 78%;
+    --border: 208 20% 85%;
+    --input: 208 20% 85%;
+    --ring: 218 100% 58%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 6%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 265 89% 78%;
-    --sidebar-primary-foreground: 0 0% 9%;
-    --sidebar-accent: 0 0% 15%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 20%;
-    --sidebar-ring: 265 89% 78%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 13%;
+    --sidebar-primary: 218 100% 58%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 208 50% 90%;
+    --sidebar-accent-foreground: 0 0% 13%;
+    --sidebar-border: 208 20% 85%;
+    --sidebar-ring: 218 100% 58%;
   }
 }
 
@@ -55,9 +58,9 @@
   body {
     @apply bg-background text-foreground font-sans;
     background: linear-gradient(135deg, 
-      hsl(250, 24%, 9%) 0%, 
-      hsl(260, 28%, 6%) 35%, 
-      hsl(270, 30%, 4%) 100%);
+      hsl(208, 78%, 94%) 0%, 
+      hsl(210, 70%, 96%) 50%, 
+      hsl(208, 78%, 94%) 100%);
     min-height: 100vh;
   }
 
@@ -80,11 +83,11 @@
 
 @layer components {
   .glass {
-    @apply bg-white/10 backdrop-blur-lg border border-white/20 shadow-lg;
+    @apply bg-white/60 backdrop-blur-lg border border-primary/20 shadow-lg;
   }
 
   .glass-hover {
-    @apply transition-all duration-300 hover:bg-white/15 hover:border-white/30 hover:shadow-xl hover:scale-[1.02];
+    @apply transition-all duration-300 hover:bg-white/70 hover:border-primary/30 hover:shadow-xl hover:scale-[1.02];
   }
 
   .gradient-text {
@@ -93,5 +96,13 @@
 
   .glow-effect {
     @apply shadow-lg shadow-primary/20;
+  }
+
+  .student-card {
+    @apply bg-card/80 backdrop-blur-sm border border-primary/10 rounded-lg p-4 hover:border-primary/20 transition-all duration-200;
+  }
+
+  .community-card {
+    @apply bg-gradient-to-br from-card to-secondary/30 border border-primary/10 rounded-xl p-6 hover:shadow-lg transition-all duration-300;
   }
 }
