@@ -86,10 +86,6 @@
     @apply transition-all duration-300 hover:bg-white/70 hover:border-primary/30 hover:shadow-xl hover:scale-[1.02];
   }
 
-  .gradient-text {
-    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
-  }
-
   .glow-effect {
     @apply shadow-lg shadow-primary/20;
   }

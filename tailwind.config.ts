@@ -86,13 +86,6 @@ export default {
 			fontFamily: {
 				sans: ['Poppins', 'Inter', 'ui-sans-serif', 'system-ui'],
 			},
-			backgroundImage: {
-				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-				'glass': 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
-			},
-			backdropBlur: {
-				'glass': '20px',
-			},
 			keyframes: {
 				'accordion-down': {
 					from: {
