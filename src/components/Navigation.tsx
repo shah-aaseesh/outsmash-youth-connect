@@ -18,10 +18,10 @@ const Navigation = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">OS</span>
             </div>
-            <span className="font-bold text-xl gradient-text">OutSmash</span>
+            <span className="font-bold text-xl text-primary">OutSmash</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -69,7 +69,7 @@ const Navigation = () => {
                 >
                   <UserCircle size={20} />
                 </Link>
-                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
                   <span className="text-white text-sm font-semibold">
                     {user.user_metadata?.full_name?.split(' ').map((n: string) => n[0]).join('') || 'U'}
                   </span>
@@ -77,7 +77,7 @@ const Navigation = () => {
               </div>
             ) : (
               <Link to="/auth">
-                <Button className="bg-gradient-to-r from-primary to-accent hover:opacity-90">
+                <Button className="bg-accent hover:bg-accent/90">
                   <User className="mr-2" size={16} />
                   Sign In
                 </Button>
@@ -157,7 +157,7 @@ const Navigation = () => {
                   className="block px-3 py-2"
                   onClick={() => setIsOpen(false)}
                 >
-                  <Button className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90">
+                  <Button className="w-full bg-accent hover:bg-accent/90">
                     <User className="mr-2" size={16} />
                     Sign In
                   </Button>

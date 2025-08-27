@@ -13,7 +13,7 @@ const HeroSection = () => {
         </div>
 
         {/* Main Headline */}
-        <h1 className="gradient-text mb-6 animate-fade-in max-w-4xl mx-auto leading-tight">
+        <h1 className="text-primary mb-6 animate-fade-in max-w-4xl mx-auto leading-tight">
           Showcase Your Potential,
           <br />
           Discover Your Future
@@ -29,7 +29,7 @@ const HeroSection = () => {
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 animate-fade-in">
           <Button 
             size="lg" 
-            className="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all duration-300 glow-effect group px-8 py-4 text-lg"
+            className="bg-accent hover:bg-accent/90 transition-all duration-300 glow-effect group px-8 py-4 text-lg"
           >
             Get Started Free
             <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={20} />

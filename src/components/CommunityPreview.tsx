@@ -47,11 +47,11 @@ const CommunityPreview = () => {
   ];
 
   return (
-    <section className="py-20 px-4 bg-gradient-to-b from-transparent to-black/20">
+    <section className="py-20 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <h2 className="gradient-text mb-4">Join Our Thriving Community</h2>
+          <h2 className="text-primary mb-4">Join Our Thriving Community</h2>
           <p className="text-xl text-foreground/70 max-w-2xl mx-auto">
             Connect with like-minded students, share experiences, and get support from peers who understand your journey.
           </p>
@@ -130,7 +130,7 @@ const CommunityPreview = () => {
                 ))}
               </div>
 
-              <Button className="w-full mt-4 bg-gradient-to-r from-primary to-accent hover:opacity-90">
+              <Button className="w-full mt-4 bg-accent hover:bg-accent/90">
                 Join Community
               </Button>
             </div>
