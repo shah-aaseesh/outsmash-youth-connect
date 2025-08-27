@@ -26,25 +26,25 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: 'hsl(218, 100%, 58%)',
+					DEFAULT: 'hsl(217, 100%, 58%)',
 					foreground: 'hsl(var(--primary-foreground))',
-					50: 'hsl(218, 100%, 95%)',
-					100: 'hsl(218, 100%, 90%)',
-					200: 'hsl(218, 100%, 80%)',
-					300: 'hsl(218, 100%, 70%)',
-					400: 'hsl(218, 100%, 64%)',
-					500: 'hsl(218, 100%, 58%)',
-					600: 'hsl(218, 100%, 52%)',
-					700: 'hsl(218, 100%, 46%)',
-					800: 'hsl(218, 100%, 40%)',
-					900: 'hsl(218, 100%, 34%)',
+					50: 'hsl(217, 100%, 95%)',
+					100: 'hsl(217, 100%, 90%)',
+					200: 'hsl(217, 100%, 80%)',
+					300: 'hsl(217, 100%, 70%)',
+					400: 'hsl(217, 100%, 64%)',
+					500: 'hsl(217, 100%, 58%)',
+					600: 'hsl(217, 100%, 52%)',
+					700: 'hsl(217, 100%, 46%)',
+					800: 'hsl(217, 100%, 40%)',
+					900: 'hsl(217, 100%, 34%)',
 				},
 				accent: {
-					DEFAULT: 'hsl(26, 100%, 50%)',
+					DEFAULT: 'hsl(25, 100%, 50%)',
 					foreground: 'hsl(var(--accent-foreground))'
 				},
 				success: {
-					DEFAULT: 'hsl(148, 100%, 39%)',
+					DEFAULT: 'hsl(145, 100%, 39%)',
 					foreground: 'hsl(var(--success-foreground))'
 				},
 				secondary: {
